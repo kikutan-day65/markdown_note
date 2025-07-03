@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="main-container mt-5">
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-header text-center">
+            <h2 class="mb-0">Profile</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Username:</strong> {{ user_detail.username }}</p>
+            <p><strong>First Name:</strong> {{ user_detail.first_name }}</p>
+            <p><strong>Last Name:</strong> {{ user_detail.last_name }}</p>
+            <p><strong>Email:</strong> {{ user_detail.email }}</p>
+        </div>
+
+        {% if user.is_authenticated and user_detail == user %}
+        <div class="card-footer d-flex flex-column gap-2">
+            <a href="{% url 'user:update' user_detail.pk %}" class="btn btn-primary w-100">Update
+                Information</a>
+            <a href="{% url 'user:change_password' %}" class="btn btn-warning w-100">Change Password</a>
+            <a href="{% url 'user:delete_user' user_detail.pk %}" class="btn btn-danger w-100">Delete Account</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock content %}

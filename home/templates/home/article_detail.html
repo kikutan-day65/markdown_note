@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block site_title %}Detail{% endblock site_title %}
+
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'home/css/article_detail_md.css' %}">
+{% endblock extra_css %}
+
+{% block content%}
+<section class="main-container">
+    <div class="article-header">
+        <div class="article-title">
+            <h1>{{ article_detail.title }}</h1>
+        </div>
+        <div class="article-author">
+            Written by <a class="link-offset-2 link-underline link-underline-opacity-0"
+                href="{% url 'user:detail' article_detail.user.pk %}">{{ article_detail.user }}</a>
+        </div>
+        <div class="article-date">
+            <span>
+                Posted: {{ article_detail.created_at|date:"Y-m-d" }}
+            </span>
+            {% if article_detail.modified_at %}
+            <span>
+                Last updated: {{ article_detail.modified_at|date:"Y-m-d" }}
+            </span>
+            {% endif %}
+        </div>
+
+        {% if user.is_authenticated and article_detail.user == user %}
+        <div class="article-actions">
+            <a class="link-offset-2" href="{% url 'home:article_update' article_detail.pk %}">Edit article</a>
+            <a class="link-offset-2" href="{% url 'home:article_delete' article_detail.pk %}">Delete article</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <hr class="border border-light">
+
+    <div class="article-content">
+        {{ article_html|safe }}
+    </div>
+</section>
+{% endblock content%}

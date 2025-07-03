@@ -1,0 +1,17 @@
+#md-editor {
+    height: 650px;
+    font-size: 16px;
+}
+
+#md-viewer {
+    height: 650px;
+    left: 50%;
+    overflow-y: scroll;
+}
+
+#md-viewer img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0.5em auto;
+}

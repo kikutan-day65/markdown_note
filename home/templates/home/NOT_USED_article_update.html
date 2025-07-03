@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block site_title %}Article update{% endblock site_title %}
+
+{% block app_css %}
+<!-- Markdown -->
+<link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.css" />
+{% endblock app_css %}
+
+{% block content %}
+<form method="POST" action="{% url 'home:article_update' article.pk %}">
+    {% csrf_token %}
+    <label for="{{ article_update_form.title.id_for_label }}">{{ article_update_form.title.label }}</label>
+    {{ article_update_form.title }}
+    <label for="{{ article_update_form.content.id_for_label }}">{{ article_update_form.content.label }}</label>
+    {{ article_update_form.content }}
+    <button type="submit">Update</button>
+</form>
+
+<div id="preview" style="border: 1px solid #ccc; padding: 10px; margin-top: 10px;"></div>
+
+{% block app_js %}
+<!-- Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.pack.js"></script>
+<script src="{% static 'home/js/markdown_form.js' %}"></script>
+{% endblock app_js %}
+{% endblock content %}
