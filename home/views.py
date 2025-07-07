@@ -150,3 +150,5 @@ def upload_article_images(request):
                 "url": image_url,
             }
         )
+
+    return JsonResponse({"success": False, "error": "No image uploaded"}, status=400)
