@@ -22,3 +22,19 @@
 ## Negative cases
 
 -   [x] 404 when article does not exist
+
+## ArticleCreateView
+
+### Positive cases
+
+-   [x] GET: create page renders successfully for logged-in user
+-   [x] POST: article creation succeeds with valid data
+-   [x] Success message is shown on successful creation
+-   [x] context["is_update"] is False
+
+### Negative cases
+
+-   [x] GET: redirects to login when not authenticated
+-   [x] POST: redirects to login when not authenticated
+-   [x] POST: article creation fails with missing required fields
+-   [x] Error messages are shown when form is invalid
