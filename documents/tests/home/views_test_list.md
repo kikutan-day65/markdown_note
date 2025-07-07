@@ -38,3 +38,22 @@
 -   [x] POST: redirects to login when not authenticated
 -   [x] POST: article creation fails with missing required fields
 -   [x] Error messages are shown when form is invalid
+
+## ArticleUpdateView
+
+### Positive cases
+
+-   [x] GET: update page renders successfully for authenticated user
+-   [x] POST: article is updated successfully with valid data
+-   [x] Context includes is_update=True
+-   [x] modified_at is set automatically
+-   [x] Shows success message after update
+
+### Negative cases
+
+-   [x] GET: unauthenticated user is redirected to login
+-   [x] POST: unauthenticated user is redirected to login
+-   [x] POST: post without_required_fields
+-   [x] Error messages are shown on invalid form
+-   [x] GET: authenticated user cannot access another user’s article
+-   [x] POST: authenticated user cannot update another user’s article
