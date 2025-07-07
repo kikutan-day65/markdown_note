@@ -57,3 +57,20 @@
 -   [x] Error messages are shown on invalid form
 -   [x] GET: authenticated user cannot access another user’s article
 -   [x] POST: authenticated user cannot update another user’s article
+
+## ArticleDeleteView
+
+### Positive cases
+
+-   [x] GET: delete confirmation page renders successfully
+-   [x] POST: article is deleted with confirmation
+-   [x] Success message is shown on successful delete
+-   [x] Redirects to home page after successful delete
+
+### Negative cases
+
+-   [x] GET: unauthenticated user is redirected to login page
+-   [x] POST: unauthenticated user is redirected to login page
+-   [x] GET: authenticated user cannot access another user’s article
+-   [x] POST: authenticated user cannot delete another user’s article
+-   [x] Article with invalid PK returns 404
