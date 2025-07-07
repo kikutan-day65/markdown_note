@@ -74,3 +74,15 @@
 -   [x] GET: authenticated user cannot access another user’s article
 -   [x] POST: authenticated user cannot delete another user’s article
 -   [x] Article with invalid PK returns 404
+
+## upload_article_images view
+
+### Positive cases
+
+-   [x] Returns 200 and JSON with success when valid image is uploaded via POST
+-   [x] Uploaded image is saved using storage backend
+-   [x] Returned URL includes correct MEDIA_URL prefix
+
+### Negative cases
+
+-   [x] POST request without image fails
