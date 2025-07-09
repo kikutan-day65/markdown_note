@@ -11,6 +11,7 @@
 
 -   [x] POST: registration fails with missing required fields
 -   [x] POST: registration fails with duplicate username
+-   [x] POST: registration fails with duplicate email
 -   [x] POST: registration fails with mismatched passwords
 
 ## Login view

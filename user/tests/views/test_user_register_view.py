@@ -168,6 +168,25 @@ def test_user_register_view_duplicate_username(client, test_user):
 
 
 @pytest.mark.django_db
+def test_user_register_view_duplicate_email(client, test_user):
+    form_data = {
+        "username": "another_testuser",
+        "email": "testuser@example.com",
+        "password1": "testpassword123",
+        "password2": "testpassword123",
+        "first_name": "Test",
+        "last_name": "User",
+    }
+    endpoint = reverse("user:register")
+    response = client.post(endpoint, data=form_data)
+    form = response.context["form"]
+
+    assert response.status_code == 200
+    assert not form.is_valid()
+    assert "email" in form.errors
+
+
+@pytest.mark.django_db
 def test_user_register_view_password_mismatch(client):
     form_data = {
         "username": "testuser",
