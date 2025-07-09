@@ -11,6 +11,7 @@ from django.utils.html import strip_tags
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from django_filters.views import FilterView
 
+from home.decorators import forbid_anonymous
 from home.utils.filepath import temp_article_images_path
 from home.utils.image_processing import process_article_images
 
@@ -136,6 +137,7 @@ class ArticleDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
         return super().form_invalid(form)
 
 
+@forbid_anonymous
 def upload_article_images(request):
     if request.method == "POST" and request.FILES.get("image"):
         temp_image = request.FILES["image"]
@@ -150,5 +152,4 @@ def upload_article_images(request):
                 "url": image_url,
             }
         )
-
     return JsonResponse({"success": False, "error": "No image uploaded"}, status=400)
