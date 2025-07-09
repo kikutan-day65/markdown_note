@@ -63,5 +63,6 @@
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.pack.js"></script>
 
 <!-- my js -->
-<script src="{% static 'home/js/markdown_form.js' %}"></script>
+<script src="{% static 'home/js/markdown_form.js' %}" id="markdown-form"
+    data-upload-article-images-url="{% url 'home:upload_article_images' %}" defer></script>
 {% endblock extra_js %}

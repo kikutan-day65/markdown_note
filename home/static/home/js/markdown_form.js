@@ -1,3 +1,6 @@
+// Get upload_article_images url
+const uploadArticleImagesUrl = document.getElementById("markdown-form").dataset.uploadArticleImagesUrl;
+
 function initEditor() {
     var editor = ace.edit("md-editor", {
         theme: "ace/theme/monokai",
@@ -106,8 +109,7 @@ function uploadImages(file, editor) {
     const formData = new FormData();
     formData.append("image", file);
 
-    // ファイルアップロード用のエンドポイントによって変更
-    fetch("/upload-article-images/", {
+    fetch(uploadArticleImagesUrl, {
         method: "POST",
         body: formData,
         headers: {
