@@ -98,6 +98,7 @@
 -   [x] GET: other user’s pk returns 404
 -   [x] POST: other user’s pk returns 404
 -   [x] POST: duplicate username results in validation error
+-   [x] POST: duplicate email results in validation error
 -   [x] POST: required fields missing
 
 ## Password reset view

@@ -127,6 +127,23 @@ def test_user_update_view_taken_username(authenticated_client, test_user, taken_
 
 
 @pytest.mark.django_db
+def test_user_update_view_taken_email(authenticated_client, test_user, taken_user):
+    form_data = {
+        "username": "testuser",
+        "email": "takenuser@example.com",
+        "first_name": "Test_updated",
+        "last_name": "User_updated",
+    }
+    endpoint = reverse("user:update", kwargs={"pk": test_user.pk})
+    response = authenticated_client.post(endpoint, data=form_data)
+    form = response.context["user_update_form"]
+
+    assert response.status_code == 200
+    assert not form.is_valid()
+    assert "email" in form.errors
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     "missing_field, form_data",
     [
