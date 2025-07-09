@@ -47,3 +47,14 @@ def test_upload_article_images_post_without_image_fails(authenticated_client):
     assert json_data["success"] is False
     assert "error" in json_data
     assert json_data["error"] == "No image uploaded"
+
+
+@pytest.mark.django_db
+def test_upload_article_images_fails_by_unauthenticated_user(client, test_image):
+    endpoint = reverse("home:upload_article_images")
+    response = client.post(endpoint, {"image": test_image})
+    json_data = response.json()
+
+    assert response.status_code == 403
+    assert json_data["success"] is False
+    assert json_data["error"] == "Forbidden: Login required"

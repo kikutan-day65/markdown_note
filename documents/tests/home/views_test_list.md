@@ -85,4 +85,5 @@
 
 ### Negative cases
 
--   [x] POST request without image fails
+-   [x] POST: request without image fails
+-   [x] POST: request by unauthorized user fails
