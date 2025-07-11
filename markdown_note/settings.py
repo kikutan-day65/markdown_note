@@ -21,7 +21,12 @@ env = environ.Env(DEBUG=(bool, False))
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Take environment variables from .env file
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"), overwrite=True)
+if os.path.exists("/etc/secrets/.env"):
+    ENV_PATH = "/etc/secrets/.env"
+else:
+    ENV_PATH = os.path.join(BASE_DIR, ".env")
+
+environ.Env.read_env(ENV_PATH, overwrite=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
