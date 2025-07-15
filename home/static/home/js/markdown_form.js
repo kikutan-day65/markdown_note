@@ -91,11 +91,11 @@ function dropHandler(ev, editor) {
     if (ev.dataTransfer.files) {
         // Use DataTransfer interface to access the file(s)
         [...ev.dataTransfer.files].forEach((file, i) => {
-            if (isImageFile(file)) {
+            if (isImageFile(file) && isLessThan3MB(file)) {
                 console.log(`… file[${i}].name = ${file.name}`);
                 uploadImages(file, editor);
             } else {
-                alert("Allowed only image files");
+                alert("Only image files smaller than 3MB are allowed.");
             }
         });
     }
@@ -103,6 +103,10 @@ function dropHandler(ev, editor) {
 
 function isImageFile(file) {
     return file.type.startsWith("image/");
+}
+
+function isLessThan3MB(file) {
+    return file.size <= 3 * 1024 * 1024;
 }
 
 function uploadImages(file, editor) {
