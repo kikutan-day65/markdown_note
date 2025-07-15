@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block site_title %}Article delete{% endblock site_title %}
+
+
+{% block content %}
+<div class="main-container p-5 bg-danger bg-opacity-10 border border-danger border-3 rounded">
+    <form method="post" action="{% url 'home:article_delete' object.pk %}">
+        {% csrf_token %}
+        <strong class="d-block mb-3">Are you sure you want to delete "{{ article.title }}"?</strong>
+        <a href="{% url 'home:article_detail' object.pk %}" class="btn btn-info">Back</a>
+        <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+</div>
+{% endblock content %}

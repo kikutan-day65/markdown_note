@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block site_title %}Delete account{% endblock site_title %}
+
+{% block content %}
+<form method="post" action="{% url 'user:delete_account' user_obj.pk %}">
+    {% csrf_token %}
+    <p>
+        Hey {{ user_obj }}, Are you sure you want to delete your account?
+    </p>
+    <button type="submit">Delete account</button>
+</form>
+{% endblock content %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load my_tags %}
+{% load widget_tweaks %}
+
+{% block site_title %}Home{% endblock site_title %}
+
+{% block content %}
+<section class="main-container mt-4">
+    <div class="home-header mb-4">
+        <h1>Articles</h1>
+        <form method="GET" class="row row-cols-lg-auto g-1 align-items-center">
+            <div class="col-12">
+                {{ filter.form.search|add_class:"form-control"|attr:"type:search"|attr:"placeholder:Search" }}
+            </div>
+            <div class="col-12">
+                {{ filter.form.ordering|add_class:"form-select" }}
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary form-control">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="article-list">
+        <ul class="list-group list-group-flush">
+            {% for article in articles %}
+            <li class="list-group-item">
+                <strong>
+                    <a class="link-offset-2 link-underline link-underline-opacity-0"
+                        href="{% url 'home:article_detail' article.pk %}">{{ article.title }}</a>
+                </strong>
+                <br>
+                <em>
+                    <small>
+                        written by <strong><a class="link-offset-2 link-underline link-underline-opacity-0"
+                                href="{% url 'user:detail' article.user.pk %}">{{ article.user }}</a></strong>
+                    </small>
+
+                    {% if article.modified_at %}
+                    <small>
+                        (posted: {{ article.created_at|date:"Y-m-d" }})
+                    </small>
+                    <small>
+                        (updated: {{ article.modified_at|date:"Y-m-d" }})
+                    </small>
+                    {% else %}
+                    <small>
+                        (posted: {{ article.created_at|date:"Y-m-d" }})
+                    </small>
+                    {% endif %}
+                </em>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="pagination-wrapper">
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+            <a href="?{% param_replace page=1 %}">&laquo;</a>
+            <a href="?{% param_replace page=page_obj.previous_page_number %}" id="prev-page">Prev &lsaquo;</a>
+            {% endif %}
+
+            {% for num in custom_page_range %}
+            {% if num == page_obj.number %}
+            <a href="?{% param_replace page=num %}" class="active">{{ num }}</a>
+            {% else %}
+            <a href="?{% param_replace page=num %}">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?{% param_replace page=page_obj.next_page_number %}" id="next-page">Next &rsaquo;</a>
+            <a href="?{% param_replace page=paginator.num_pages %}">&raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+
+{% block extra_js %}
+<script src="{% static 'home/js/pagination.js' %}"></script>
+{% endblock extra_js %}
+    

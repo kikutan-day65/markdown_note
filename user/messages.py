@@ -1,0 +1,6 @@
+LOGOUT_SUCCESS = "Logged out. See you soon!"
+REGISTER_SUCCESS = "Registered successfully!"
+LOGIN_SUCCESS = "Logged in successfully!"
+PASSWORD_CHANGE_SUCCESS = "Password changed successfully!"
+ACCOUNT_DELETE_SUCCESS = "Account deleted successfully. Goodbye!"
+USER_UPDATE_SUCCESS = "Updated successfully!"

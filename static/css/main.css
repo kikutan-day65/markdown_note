@@ -1,0 +1,45 @@
+/* main container css */
+.main-container {
+    max-width: 900px;
+    margin: 50px auto;
+    line-height: 1.5em;
+}
+
+/* pagination css */
+.pagination-wrapper {
+    text-align: center;
+}
+
+.pagination {
+    display: inline-block;
+    margin: 50px auto;
+}
+
+.pagination a {
+    color: white;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    border: 1px solid #ddd;
+    margin: 0 4px;
+}
+
+.pagination a.active {
+    background-color: #4caf50;
+    color: white;
+    border: 1px solid #4caf50;
+}
+
+.pagination a:hover:not(.active) {
+    background-color: #ddd;
+}
+
+/* blockquote css*/
+blockquote {
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-left: 4px solid;
+    font-style: italic;
+    color: #aaa;
+}
