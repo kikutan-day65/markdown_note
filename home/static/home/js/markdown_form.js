@@ -2,6 +2,7 @@
 const uploadArticleImagesUrl = document.getElementById("markdown-form").dataset.uploadArticleImagesUrl;
 
 function initEditor() {
+    // Ace editor settings
     var editor = ace.edit("md-editor", {
         theme: "ace/theme/monokai",
         mode: "ace/mode/markdown",
@@ -13,12 +14,14 @@ function initEditor() {
         showInvisibles: true,
     });
 
+    // Check if markdown_content exists
+    //      If true → set it in the editor
+    //      If false → set an empty string in the editor
     var mdContent = document.getElementById("md-content");
-
     if (mdContent && mdContent.value.trim()) {
-        editor.setValue(mdContent.value, -1);
+        editor.setValue(mdContent.value);
     } else {
-        editor.setValue("", -1);
+        editor.setValue("");
     }
 
     var viewer = parseMarkdown(editor);
@@ -84,20 +87,26 @@ function dragOverHandler(ev) {
     ev.preventDefault();
 }
 
-function dropHandler(ev, editor) {
+async function dropHandler(ev, editor) {
     // Prevent default behavior (Prevent file from being opened)
     ev.preventDefault();
 
     if (ev.dataTransfer.files) {
-        // Use DataTransfer interface to access the file(s)
-        [...ev.dataTransfer.files].forEach((file, i) => {
+        // List of files added by user
+        const files = [...ev.dataTransfer.files];
+
+        for (const file of files) {
+            // Check if its filetype and filesize
             if (isImageFile(file) && isLessThan3MB(file)) {
-                console.log(`… file[${i}].name = ${file.name}`);
-                uploadImages(file, editor);
+                const uploadSuccess = await uploadImages(file, editor);
+                if (!uploadSuccess) {
+                    break;
+                }
             } else {
                 alert("Only image files smaller than 3MB are allowed.");
+                break;
             }
-        });
+        }
     }
 }
 
@@ -109,29 +118,34 @@ function isLessThan3MB(file) {
     return file.size <= 3 * 1024 * 1024;
 }
 
-function uploadImages(file, editor) {
-    const formData = new FormData();
-    formData.append("image", file);
+async function uploadImages(file, editor) {
+    try {
+        const formData = new FormData();
 
-    fetch(uploadArticleImagesUrl, {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-CSRFToken": getCSRFToken(),
-        },
-        credentials: "include",
-    })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success && data.url) {
-                editor.insert(`![alt text](${data.url})\n`);
-            } else {
-                alert("Image upload failed");
-            }
-        })
-        .catch((err) => {
-            console.error("Upload error", err);
+        // Enable to access the image with request.FILES["image"]
+        formData.append("image", file);
+
+        const response = await fetch(uploadArticleImagesUrl, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+            },
+            credentials: "include",
         });
+
+        const data = await response.json();
+        if (response.ok && data.image_url) {
+            editor.insert(`![alt text](${data.image_url})\n`);
+            return true;
+        } else {
+            alert(data.error || "Upload failed");
+            return false;
+        }
+    } catch (err) {
+        console.log(err);
+        return false;
+    }
 }
 
 function getCSRFToken() {
