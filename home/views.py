@@ -117,16 +117,27 @@ class ArticleUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        user = form.instance.user
         article = form.instance
-        article = process_article_images(article, user.id)
+        markdown_content = article.markdown_content
+
+        # Convert markdown to html
+        html_content = convert_to_html(markdown_content)
+
+        article.html_content = html_content
+
+        # Associate images in article with article id
+        associate_images_with_article(html_content, article)
+
+        # Delete unused images
+        delete_unused_images(html_content, article)
+
         article.modified_at = timezone.now()
         return super().form_valid(form)
 
     def form_invalid(self, form):
         for field, error in form.errors.items():
             error_message = strip_tags(error)
-            messages.error(self.request, error_message)
+            messages.error(self.request, f"{field}: {error_message}")
         return super().form_invalid(form)
 
 
