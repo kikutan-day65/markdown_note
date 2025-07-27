@@ -1,9 +1,6 @@
-import markdown
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -44,22 +41,6 @@ class ArticleDetailView(DetailView):
     template_name = "home/article_detail.html"
     model = Article
     context_object_name = "article_detail"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        markdown_text = self.object.content
-        html_content = markdown.markdown(
-            markdown_text,
-            extensions=[
-                "extra",
-                "codehilite",
-                "toc",
-                "admonition",
-                "smarty",
-            ],
-        )
-        context["article_html"] = html_content
-        return context
 
 
 class ArticleCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
