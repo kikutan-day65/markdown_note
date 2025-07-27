@@ -67,11 +67,22 @@ class ArticleCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def form_valid(self, form):
         user = self.request.user
-        form.instance.user = user
-        article = form.save()
-        article = process_article_images(article, user.id)
-        article.modified_at = None
+        markdown_content = form.cleaned_data["markdown_content"]
+
+        # Convert markdown to html
+        html_content = convert_to_html(markdown_content)
+
+        article = form.save(commit=False)
+        article.user = user
+        article.html_content = html_content
         article.save()
+
+        # Associate images in article with article id
+        associate_images_with_article(html_content, article)
+
+        # Delete unused images
+        delete_unused_images(html_content, article)
+
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -82,7 +93,7 @@ class ArticleCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     def form_invalid(self, form):
         for field, error in form.errors.items():
             error_message = strip_tags(error)
-            messages.error(self.request, error_message)
+            messages.error(self.request, f"{field}: {error_message}")
         return super().form_invalid(form)
 
 
