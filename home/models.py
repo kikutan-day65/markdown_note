@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 from home.utils.filepath import article_images_path
 
@@ -33,3 +35,9 @@ class ArticleImage(models.Model):
         on_delete=models.CASCADE,
         related_name="uploaded_article_images",
     )
+
+
+@receiver(post_delete, sender=ArticleImage)
+def delete_article_image_file(sender, instance, **kwargs):
+    if instance.article_image:
+        instance.article_image.delete(save=False)
