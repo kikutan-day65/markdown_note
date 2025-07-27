@@ -34,13 +34,12 @@
         </div>
 
         <!-- content フィールド（非表示）-->
-        {{ form.content|attr:"hidden" }}
+        {{ form.markdown_content|attr:"hidden" }}
 
         <!-- エディタとプレビューを横並び -->
         <div class="row">
             <!-- markdown エディタ用の div -->
-            <div class="col-md-6" id="md-editor">
-            </div>
+            <div class="col-md-6" id="md-editor"></div>
             <!-- markdown プレビューボックス用の div -->
             <div class="col-md-6" id="md-viewer"></div>
         </div>
