@@ -208,6 +208,26 @@ else:
     EMAIL_USE_TLS = env("EMAIL_USE_TLS")
     DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
+# HTML sanitization settings
+# fmt: off
+NH3_HTML_SANITIZERS = {
+    "tags": {
+        "p", "strong", "em", "ul", "ol", "li", "a", "img", "code", "pre",
+        "blockquote", "h1", "h2", "h3", "h4", "h5", "br", "hr",
+        "table", "thead", "tbody", "tr", "th", "td",
+        "div", "span"
+    },
+    "attributes": {
+        "a": {"href", "title"},
+        "img": {"src", "alt", "title"},
+        "div": {"class"},
+        "code": {"class"},
+        "pre": {"class"},
+        "span": {"class"},
+    },
+    "url_schemes": {"http", "https", ""},
+}
+# fmt: on
 
 # Django debug toolbar settings
 if DEBUG:
