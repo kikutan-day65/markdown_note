@@ -21,6 +21,7 @@ from .messages import (
     ARTICLE_CREATE_SUCCESS,
     ARTICLE_DELETE_SUCCESS,
     ARTICLE_UPDATE_SUCCESS,
+    IMAGE_NOT_UPLOADED,
 )
 from .models import Article, ArticleImage
 from .paginations import MyPagination
