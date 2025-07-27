@@ -155,7 +155,7 @@ class ArticleDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     def form_invalid(self, form):
         for field, error in form.errors.items():
             error_message = strip_tags(error)
-            messages.error(self.request, error_message)
+            messages.error(self.request, f"{field}: {error_message}")
         return super().form_invalid(form)
 
 
