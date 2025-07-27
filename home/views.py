@@ -162,16 +162,16 @@ class ArticleDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 @forbid_anonymous
 def upload_article_images(request):
     if request.method == "POST" and request.FILES.get("image"):
-        temp_image = request.FILES["image"]
-        temp_image_path = temp_article_images_path(request.user, temp_image.name)
-        saved_image = default_storage.save(temp_image_path, temp_image)
-        image_url = settings.MEDIA_URL + saved_image
-        print(image_url)
+        image_file = request.FILES["image"]
+        user = request.user
 
-        return JsonResponse(
-            {
-                "success": True,
-                "url": image_url,
-            }
+        is_valid, error_message = is_valid_upload(request.user, image_file)
+        if not is_valid:
+            return JsonResponse({"error": error_message}, status=400)
+
+        image_obj = ArticleImage.objects.create(
+            article_image=image_file, article=None, user=user
         )
-    return JsonResponse({"success": False, "error": "No image uploaded"}, status=400)
+        return JsonResponse({"image_url": image_obj.article_image.url}, status=200)
+
+    return JsonResponse({"error": IMAGE_NOT_UPLOADED}, status=400)
