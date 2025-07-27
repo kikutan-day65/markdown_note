@@ -12,8 +12,12 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from django_filters.views import FilterView
 
 from home.decorators import forbid_anonymous
-from home.utils.filepath import temp_article_images_path
-from home.utils.image_processing import process_article_images
+from home.utils.content_utils import (
+    associate_images_with_article,
+    convert_to_html,
+    delete_unused_images,
+    is_valid_upload,
+)
 
 from .filters import ArticleFilter
 from .forms import ArticleForm
