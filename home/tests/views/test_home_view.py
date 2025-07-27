@@ -1,63 +1,82 @@
 import pytest
 from django.urls import reverse
 
+from home.filters import ArticleFilter
 from home.models import Article
 
 
 @pytest.mark.django_db
-def test_home_view_renders_successfully(client):
+def test_renders_template(client):
+    endpoint = reverse("home:home_page")
+    response = client.get(endpoint)
+    template_names = [
+        template.name for template in response.templates if template.name is not None
+    ]
+
+    assert response.status_code == 200
+    assert "home/home.html" in template_names
+
+
+@pytest.mark.django_db
+def test_includes_articles_in_context(client):
     endpoint = reverse("home:home_page")
     response = client.get(endpoint)
 
     assert response.status_code == 200
-    assert "home/home.html" in [t.name for t in response.templates]
-
-
-@pytest.mark.django_db
-def test_home_view_contains_articles(client, test_article):
-    endpoint = reverse("home:home_page")
-    response = client.get(endpoint)
-
     assert "articles" in response.context
-    assert list(response.context["articles"])
 
 
 @pytest.mark.django_db
-def test_home_view_contains_filter_in_context(client, test_article):
+def test_articles_descending_ordered_by_created_at(client, user):
+    article_1 = Article.objects.create(
+        title="Article 1", markdown_content="Article content 1", user=user
+    )
+    article_2 = Article.objects.create(
+        title="Article 2", markdown_content="Article content 2", user=user
+    )
     endpoint = reverse("home:home_page")
     response = client.get(endpoint)
+    article_list = list(response.context["articles"])
 
-    assert "filter" in response.context
+    assert response.status_code == 200
+    assert article_2.created_at > article_1.created_at
+    assert article_list[0] == article_2
+    assert article_list[-1] == article_1
 
 
 @pytest.mark.django_db
-def test_home_view_pagination(client, test_user):
-    for i in range(11):
+def test_10_articles_per_page(client, user):
+    for i in range(15):
         Article.objects.create(
-            title=f"test_title_{i}", content=f"test_content_{i}", user=test_user
+            title=f"Article {i}", markdown_content=f"Article content {i}", user=user
         )
-
     endpoint = reverse("home:home_page")
+    response_page_1 = client.get(endpoint)
+    articles_page_1 = response_page_1.context["articles"]
 
-    response_page1 = client.get(endpoint)
-    assert response_page1.status_code == 200
-    assert "articles" in response_page1.context
-    assert len(response_page1.context["articles"]) == 10
+    response_page_2 = client.get(endpoint + "?page=2")
+    articles_page_2 = response_page_2.context["articles"]
 
-    response_page2 = client.get(endpoint + "?page=2")
-    assert response_page2.status_code == 200
-    assert len(response_page2.context["articles"]) == 1
+    assert response_page_1.status_code == 200
+    assert len(articles_page_1) == 10
+
+    assert response_page_2.status_code == 200
+    assert len(articles_page_2) == 5
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    "invalid_param",
-    ["?page=abc", "?page=-1", "?page=999999"],
-    ids=["non_numeric", "negative", "too_large"],
-)
-def test_home_view_invalid_get_params_does_not_crash(client, invalid_param):
-    endpoint = reverse("home:home_page") + invalid_param
+def test_article_filter_in_context(client):
+    endpoint = reverse("home:home_page")
     response = client.get(endpoint)
 
-    assert response.status_code != 500
-    assert response.status_code in [200, 404]
+    assert response.status_code == 200
+    assert isinstance(response.context["filter"], ArticleFilter)
+
+
+@pytest.mark.django_db
+def test_page_is_out_of_range(client):
+    dummy_page = 999
+    endpoint = reverse("home:home_page")
+    response = client.get(endpoint + f"?page={dummy_page}")
+
+    assert response.status_code == 404

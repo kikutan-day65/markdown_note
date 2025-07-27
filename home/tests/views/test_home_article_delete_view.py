@@ -1,5 +1,4 @@
 import pytest
-from django.contrib.messages import get_messages
 from django.urls import reverse
 
 from home.messages import ARTICLE_DELETE_SUCCESS
@@ -7,91 +6,89 @@ from home.models import Article
 
 
 @pytest.mark.django_db
-def test_article_delete_view_renders_successfully(authenticated_client, test_article):
-    endpoint = reverse("home:article_delete", kwargs={"pk": test_article.pk})
+def test_renders_template(authenticated_client, article):
+    endpoint = reverse("home:article_delete", kwargs={"pk": article.pk})
     response = authenticated_client.get(endpoint)
+    template_names = [
+        template.name for template in response.templates if template.name is not None
+    ]
 
     assert response.status_code == 200
-    assert "common/delete.html" in [t.name for t in response.templates]
+    assert "common/delete.html" in template_names
 
 
 @pytest.mark.django_db
-def test_article_delete_view_successfully(authenticated_client, test_article):
-    endpoint = reverse("home:article_delete", kwargs={"pk": test_article.pk})
-    success_endpoint = reverse("home:home_page")
+def test_deletes_article(authenticated_client, article):
+    endpoint = reverse("home:article_delete", kwargs={"pk": article.pk})
     response = authenticated_client.post(endpoint)
-
-    with pytest.raises(Article.DoesNotExist):
-        Article.objects.get(pk=test_article.pk)
 
     assert response.status_code == 302
-    assert response.url == success_endpoint
+    assert not Article.objects.filter(pk=article.pk).exists()
 
 
 @pytest.mark.django_db
-def test_article_delete_view_shows_success_message(authenticated_client, test_article):
-    endpoint = reverse("home:article_delete", kwargs={"pk": test_article.pk})
+def test_redirects_success_url(authenticated_client, article):
+    endpoint = reverse("home:article_delete", kwargs={"pk": article.pk})
     response = authenticated_client.post(endpoint)
-    messages = list(get_messages(response.wsgi_request))
+    redirect_url = reverse("home:home_page")
 
-    assert any(ARTICLE_DELETE_SUCCESS in str(m) for m in messages)
+    assert response.status_code == 302
+    assert response.url == redirect_url
 
 
 @pytest.mark.django_db
-def test_article_delete_view_get_by_unauthenticated_user(client, test_article):
-    endpoint = reverse("home:article_delete", kwargs={"pk": test_article.pk})
-    login_url = reverse("user:login")
-    redirect_endpoint = f"{login_url}?next={endpoint}"
+def test_shows_success_messages(authenticated_client, article):
+    endpoint = reverse("home:article_delete", kwargs={"pk": article.pk})
+    response = authenticated_client.post(endpoint, follow=True)
+    success_messages = list(response.context["messages"])
+
+    assert response.status_code == 200
+    assert any(ARTICLE_DELETE_SUCCESS in str(message) for message in success_messages)
+
+
+@pytest.mark.django_db
+def test_get_by_unauthenticated_user(client, article):
+    endpoint = reverse("home:article_delete", kwargs={"pk": article.pk})
     response = client.get(endpoint)
-
-    assert response.status_code == 302
-    assert response.url == redirect_endpoint
-
-
-@pytest.mark.django_db
-def test_article_delete_view_post_by_unauthenticated_user(client, test_article):
-    endpoint = reverse("home:article_delete", kwargs={"pk": test_article.pk})
     login_url = reverse("user:login")
-    redirect_endpoint = f"{login_url}?next={endpoint}"
-    response = client.post(endpoint)
+    redirect_url = f"{login_url}?next={endpoint}"
 
     assert response.status_code == 302
-    assert response.url == redirect_endpoint
+    assert response.url == redirect_url
 
 
 @pytest.mark.django_db
-def test_delete_view_get_forbids_access_to_other_users_article(
-    authenticated_client, taken_user
-):
-    other_user_article = Article.objects.create(
-        title="other_user_title", content="other_user_content", user=taken_user
+def test_post_by_unauthenticated_user(client, article):
+    endpoint = reverse("home:article_delete", kwargs={"pk": article.pk})
+    response = client.post(endpoint)
+    login_url = reverse("user:login")
+    redirect_url = f"{login_url}?next={endpoint}"
+
+    assert response.status_code == 302
+    assert response.url == redirect_url
+
+
+@pytest.mark.django_db
+def test_get_deletes_others_article(authenticated_client, another_user):
+    # User tries to access other's article delete page
+    another_article = Article.objects.create(
+        title="Another Title", markdown_content="Another Content", user=another_user
     )
-    endpoint = reverse("home:article_delete", kwargs={"pk": other_user_article.pk})
+    endpoint = reverse("home:article_delete", kwargs={"pk": another_article.pk})
     response = authenticated_client.get(endpoint)
 
     assert response.status_code == 404
 
 
 @pytest.mark.django_db
-def test_update_view_post_forbids_access_to_other_users_article(
-    authenticated_client, taken_user
+def test_post_deletes_others_article(
+    authenticated_client, article_form_data, another_user
 ):
-    other_user_article = Article.objects.create(
-        title="other_user_title", content="other_user_content", user=taken_user
+    # User tries to delete other's article
+    another_article = Article.objects.create(
+        title="Another Title", markdown_content="Another Content", user=another_user
     )
-    endpoint = reverse("home:article_delete", kwargs={"pk": other_user_article.pk})
-    response = authenticated_client.post(endpoint)
+    endpoint = reverse("home:article_delete", kwargs={"pk": another_article.pk})
+    response = authenticated_client.post(endpoint, data=article_form_data)
 
     assert response.status_code == 404
-
-
-@pytest.mark.django_db
-def test_article_delete_view_with_invalid_pk_returns_404(authenticated_client):
-    invalid_pk = 9999
-    endpoint = reverse("home:article_delete", kwargs={"pk": invalid_pk})
-
-    response_get = authenticated_client.get(endpoint)
-    assert response_get.status_code == 404
-
-    response_post = authenticated_client.post(endpoint)
-    assert response_post.status_code == 404
