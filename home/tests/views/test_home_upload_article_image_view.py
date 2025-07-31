@@ -1,60 +1,69 @@
 from unittest.mock import patch
 
 import pytest
-from django.conf import settings
 from django.urls import reverse
 
+from home.messages import IMAGE_NOT_UPLOADED, LOGIN_REQUIRED
+from home.models import ArticleImage
+
 
 @pytest.mark.django_db
-def test_upload_article_images_success(authenticated_client, test_image):
+def test_upload_image(authenticated_client, image):
     endpoint = reverse("home:upload_article_images")
-    response = authenticated_client.post(endpoint, {"image": test_image})
-    json_data = response.json()
+    response = authenticated_client.post(endpoint, data={"image": image})
 
     assert response.status_code == 200
-    assert json_data["success"] is True
-    assert "url" in json_data
 
-
-@pytest.mark.django_db
-def test_upload_article_image_uses_storage_backend(authenticated_client, test_image):
-    endpoint = reverse("home:upload_article_images")
-
-    with patch("home.views.default_storage.save") as mock_save:
-        mock_save.return_value = "dummy/path/test_image.jpg"
-        response = authenticated_client.post(endpoint, {"image": test_image})
-
-        assert response.status_code == 200
-        mock_save.assert_called_once()
-
-
-@pytest.mark.django_db
-def test_upload_article_images_returns_correct_url(authenticated_client, test_image):
-    endpoint = reverse("home:upload_article_images")
-    response = authenticated_client.post(endpoint, {"image": test_image})
     json_data = response.json()
-
-    assert json_data["url"].startswith(settings.MEDIA_URL)
-
-
-@pytest.mark.django_db
-def test_upload_article_images_post_without_image_fails(authenticated_client):
-    endpoint = reverse("home:upload_article_images")
-    response = authenticated_client.post(endpoint, {})
-    json_data = response.json()
-
-    assert response.status_code == 400
-    assert json_data["success"] is False
-    assert "error" in json_data
-    assert json_data["error"] == "No image uploaded"
+    assert json_data["image_url"]
 
 
 @pytest.mark.django_db
-def test_upload_article_images_fails_by_unauthenticated_user(client, test_image):
+def test_creates_article_image_instance(authenticated_client, image, user):
     endpoint = reverse("home:upload_article_images")
-    response = client.post(endpoint, {"image": test_image})
-    json_data = response.json()
+    response = authenticated_client.post(endpoint, data={"image": image})
+
+    assert response.status_code == 200
+    assert ArticleImage.objects.count() == 1
+
+    article_image = ArticleImage.objects.first()
+
+    assert article_image.article is None
+    assert article_image.user == user
+
+
+@pytest.mark.django_db
+@patch("home.views.is_valid_upload")
+def test_creates_article_image_instance(
+    mock_is_valid_upload, authenticated_client, image
+):
+    mock_is_valid_upload.return_value = (True, "")
+
+    endpoint = reverse("home:upload_article_images")
+    response = authenticated_client.post(endpoint, data={"image": image})
+
+    assert response.status_code == 200
+    mock_is_valid_upload.assert_called_once()
+
+
+@pytest.mark.django_db
+def test_upload_image_by_unauthenticated_user(client, image):
+    endpoint = reverse("home:upload_article_images")
+    response = client.post(endpoint, data={"image": image})
 
     assert response.status_code == 403
+
+    json_data = response.json()
     assert json_data["success"] is False
-    assert json_data["error"] == "Forbidden: Login required"
+    assert json_data["error"] == LOGIN_REQUIRED
+
+
+@pytest.mark.django_db
+def test_post_without_image(authenticated_client):
+    endpoint = reverse("home:upload_article_images")
+    response = authenticated_client.post(endpoint)
+
+    assert response.status_code == 400
+
+    json_data = response.json()
+    assert json_data["error"] == IMAGE_NOT_UPLOADED

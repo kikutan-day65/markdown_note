@@ -149,7 +149,7 @@ def test_user_register_view_post_without_required_fields(
 
 
 @pytest.mark.django_db
-def test_user_register_view_duplicate_username(client, test_user):
+def test_user_register_view_duplicate_username(client, user):
     form_data = {
         "username": "testuser",
         "email": "testuser@example.com",
@@ -168,7 +168,7 @@ def test_user_register_view_duplicate_username(client, test_user):
 
 
 @pytest.mark.django_db
-def test_user_register_view_duplicate_email(client, test_user):
+def test_user_register_view_duplicate_email(client, user):
     form_data = {
         "username": "another_testuser",
         "email": "testuser@example.com",

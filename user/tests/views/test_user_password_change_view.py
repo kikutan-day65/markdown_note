@@ -17,14 +17,14 @@ def test_user_password_change_view(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_password_change_success(authenticated_client, test_user):
+def test_password_change_success(authenticated_client, user):
     form_data = {
         "old_password": "testpassword123",
         "new_password1": "newpassword123",
         "new_password2": "newpassword123",
     }
     endpoint = reverse("user:change_password")
-    redirect_url = reverse("user:detail", kwargs={"pk": test_user.pk})
+    redirect_url = reverse("user:detail", kwargs={"pk": user.pk})
     response = authenticated_client.post(endpoint, data=form_data)
 
     assert response.status_code == 302

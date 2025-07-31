@@ -4,10 +4,10 @@ from home.forms import ArticleForm
 
 
 @pytest.mark.django_db
-def test_form_wit_valid_data():
+def test_form_with_valid_data():
     form_data = {
         "title": "test_title",
-        "content": "test_content",
+        "markdown_content": "test_content",
     }
     form = ArticleForm(data=form_data)
 
@@ -18,8 +18,8 @@ def test_form_wit_valid_data():
 @pytest.mark.parametrize(
     "error_field, form_data",
     [
-        ("title", {"title": None, "content": "test_content"}),
-        ("content", {"title": "test_title", "content": None}),
+        ("title", {"title": None, "markdown_content": "test_content"}),
+        ("markdown_content", {"title": "test_title", "markdown_content": None}),
     ],
     ids=["missing_title", "missing_content"],
 )

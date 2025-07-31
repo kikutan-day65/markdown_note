@@ -1,9 +1,6 @@
-import markdown
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -12,8 +9,12 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from django_filters.views import FilterView
 
 from home.decorators import forbid_anonymous
-from home.utils.filepath import temp_article_images_path
-from home.utils.image_processing import process_article_images
+from home.utils.content_utils import (
+    associate_images_with_article,
+    convert_to_html,
+    delete_unused_images,
+    is_valid_upload,
+)
 
 from .filters import ArticleFilter
 from .forms import ArticleForm
@@ -21,6 +22,7 @@ from .messages import (
     ARTICLE_CREATE_SUCCESS,
     ARTICLE_DELETE_SUCCESS,
     ARTICLE_UPDATE_SUCCESS,
+    IMAGE_NOT_UPLOADED,
 )
 from .models import Article, ArticleImage
 from .paginations import MyPagination
@@ -40,22 +42,6 @@ class ArticleDetailView(DetailView):
     model = Article
     context_object_name = "article_detail"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        markdown_text = self.object.content
-        html_content = markdown.markdown(
-            markdown_text,
-            extensions=[
-                "extra",
-                "codehilite",
-                "toc",
-                "admonition",
-                "smarty",
-            ],
-        )
-        context["article_html"] = html_content
-        return context
-
 
 class ArticleCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     template_name = "home/article_form.html"
@@ -67,11 +53,22 @@ class ArticleCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def form_valid(self, form):
         user = self.request.user
-        form.instance.user = user
-        article = form.save()
-        article = process_article_images(article, user.id)
-        article.modified_at = None
+        markdown_content = form.cleaned_data["markdown_content"]
+
+        # Convert markdown to html
+        html_content = convert_to_html(markdown_content)
+
+        article = form.save(commit=False)
+        article.user = user
+        article.html_content = html_content
         article.save()
+
+        # Associate images in article with article id
+        associate_images_with_article(html_content, article)
+
+        # Delete unused images
+        delete_unused_images(html_content, article)
+
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -82,7 +79,7 @@ class ArticleCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     def form_invalid(self, form):
         for field, error in form.errors.items():
             error_message = strip_tags(error)
-            messages.error(self.request, error_message)
+            messages.error(self.request, f"{field}: {error_message}")
         return super().form_invalid(form)
 
 
@@ -106,16 +103,27 @@ class ArticleUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        user = form.instance.user
         article = form.instance
-        article = process_article_images(article, user.id)
+        markdown_content = article.markdown_content
+
+        # Convert markdown to html
+        html_content = convert_to_html(markdown_content)
+
+        article.html_content = html_content
+
+        # Associate images in article with article id
+        associate_images_with_article(html_content, article)
+
+        # Delete unused images
+        delete_unused_images(html_content, article)
+
         article.modified_at = timezone.now()
         return super().form_valid(form)
 
     def form_invalid(self, form):
         for field, error in form.errors.items():
             error_message = strip_tags(error)
-            messages.error(self.request, error_message)
+            messages.error(self.request, f"{field}: {error_message}")
         return super().form_invalid(form)
 
 
@@ -133,23 +141,23 @@ class ArticleDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     def form_invalid(self, form):
         for field, error in form.errors.items():
             error_message = strip_tags(error)
-            messages.error(self.request, error_message)
+            messages.error(self.request, f"{field}: {error_message}")
         return super().form_invalid(form)
 
 
 @forbid_anonymous
 def upload_article_images(request):
     if request.method == "POST" and request.FILES.get("image"):
-        temp_image = request.FILES["image"]
-        temp_image_path = temp_article_images_path(request.user, temp_image.name)
-        saved_image = default_storage.save(temp_image_path, temp_image)
-        image_url = settings.MEDIA_URL + saved_image
-        print(image_url)
+        image_file = request.FILES["image"]
+        user = request.user
 
-        return JsonResponse(
-            {
-                "success": True,
-                "url": image_url,
-            }
+        is_valid, error_message = is_valid_upload(request.user, image_file)
+        if not is_valid:
+            return JsonResponse({"error": error_message}, status=400)
+
+        image_obj = ArticleImage.objects.create(
+            article_image=image_file, article=None, user=user
         )
-    return JsonResponse({"success": False, "error": "No image uploaded"}, status=400)
+        return JsonResponse({"image_url": image_obj.article_image.url}, status=200)
+
+    return JsonResponse({"error": IMAGE_NOT_UPLOADED}, status=400)

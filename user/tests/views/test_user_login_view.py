@@ -24,7 +24,7 @@ def test_user_login_view_get(client):
     ],
     ids=["username", "email"],
 )
-def test_user_login_view(client, test_user, username, password):
+def test_user_login_view(client, user, username, password):
     form_data = {
         "username": username,
         "password": password,
@@ -41,7 +41,7 @@ def test_user_login_view(client, test_user, username, password):
 
 
 @pytest.mark.django_db
-def test_user_login_view_success_message(client, test_user):
+def test_user_login_view_success_message(client, user):
     form_data = {
         "username": "testuser",
         "password": "testpassword123",
@@ -71,7 +71,7 @@ def test_user_login_view_context(client):
     ids=["username", "password"],
 )
 def test_user_login_view_without_required_fields(
-    client, test_user, missing_field, form_data
+    client, user, missing_field, form_data
 ):
     endpoint = reverse("user:login")
     response = client.post(endpoint, data=form_data)
@@ -83,7 +83,7 @@ def test_user_login_view_without_required_fields(
 
 
 @pytest.mark.django_db
-def test_user_login_view_with_wrong_password(client, test_user):
+def test_user_login_view_with_wrong_password(client, user):
     form_data = {
         "username": "testuser",
         "password": "wrong_password",
@@ -107,7 +107,7 @@ def test_user_login_view_with_wrong_password(client, test_user):
     ],
     ids=["wrong_username", "wrong_email"],
 )
-def test_user_login_view_with_wrong_username(client, test_user, username, password):
+def test_user_login_view_with_wrong_username(client, user, username, password):
     form_data = {
         "username": username,
         "password": password,
@@ -131,7 +131,7 @@ def test_user_login_view_with_wrong_username(client, test_user, username, passwo
     ],
     ids=["username_empty_password", "email_empty_password"],
 )
-def test_user_login_view_without_password(client, test_user, username, password):
+def test_user_login_view_without_password(client, user, username, password):
     form_data = {
         "username": username,
         "password": password,

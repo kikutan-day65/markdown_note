@@ -156,12 +156,6 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -178,6 +172,24 @@ MEDIA_URL = "media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Storage settings
+if DEBUG:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    STORAGES = {
+        "default": {"BACKEND": ""},  # S3を使いたい
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
 # SMTP settings
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -190,6 +202,26 @@ else:
     EMAIL_USE_TLS = env("EMAIL_USE_TLS")
     DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
+# HTML sanitization settings
+# fmt: off
+NH3_HTML_SANITIZERS = {
+    "tags": {
+        "p", "strong", "em", "ul", "ol", "li", "a", "img", "code", "pre",
+        "blockquote", "h1", "h2", "h3", "h4", "h5", "br", "hr",
+        "table", "thead", "tbody", "tr", "th", "td",
+        "div", "span"
+    },
+    "attributes": {
+        "a": {"href", "title"},
+        "img": {"src", "alt", "title"},
+        "div": {"class"},
+        "code": {"class"},
+        "pre": {"class"},
+        "span": {"class"},
+    },
+    "url_schemes": {"http", "https", ""},
+}
+# fmt: on
 
 # Django debug toolbar settings
 if DEBUG:

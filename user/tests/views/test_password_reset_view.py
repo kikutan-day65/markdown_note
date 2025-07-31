@@ -21,9 +21,9 @@ def test_password_reset_view_context(client):
 
 
 @pytest.mark.django_db
-def test_password_reset_view_post(client, test_user):
+def test_password_reset_view_post(client, user):
     form_data = {
-        "email": test_user.email,
+        "email": user.email,
     }
     endpoint = reverse("user:password_reset")
     redirect_endpoint = reverse("user:password_reset_done")
@@ -34,7 +34,7 @@ def test_password_reset_view_post(client, test_user):
 
     assert len(mail.outbox) == 1
     email = mail.outbox[0]
-    assert test_user.email in email.to
+    assert user.email in email.to
     assert "Reset Your Password on" in email.subject
 
 

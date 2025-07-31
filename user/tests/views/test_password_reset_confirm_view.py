@@ -11,9 +11,9 @@ CustomUser = get_user_model()
 
 
 @pytest.mark.django_db
-def test_password_reset_confirm_view_get(client, test_user):
-    uidb64 = urlsafe_base64_encode(force_bytes(test_user.pk))
-    token = default_token_generator.make_token(test_user)
+def test_password_reset_confirm_view_get(client, user):
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
     endpoint = reverse(
         "user:password_reset_confirm",
         kwargs={"uidb64": uidb64, "token": token},
@@ -27,9 +27,9 @@ def test_password_reset_confirm_view_get(client, test_user):
 
 
 @pytest.mark.django_db
-def test_password_reset_confirm_view_context(client, test_user):
-    uidb64 = urlsafe_base64_encode(force_bytes(test_user.pk))
-    token = default_token_generator.make_token(test_user)
+def test_password_reset_confirm_view_context(client, user):
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
     endpoint = reverse(
         "user:password_reset_confirm",
         kwargs={"uidb64": uidb64, "token": token},
@@ -40,9 +40,9 @@ def test_password_reset_confirm_view_context(client, test_user):
 
 
 @pytest.mark.django_db
-def test_password_reset_confirm_success(client, test_user):
-    uidb64 = urlsafe_base64_encode(force_bytes(test_user.pk))
-    token = default_token_generator.make_token(test_user)
+def test_password_reset_confirm_success(client, user):
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
 
     endpoint = reverse(
         "user:password_reset_confirm",
@@ -56,8 +56,8 @@ def test_password_reset_confirm_success(client, test_user):
     response_get = client.get(endpoint, follow=True)
     response_post = client.post(response_get.request["PATH_INFO"], data=form_data)
 
-    test_user.refresh_from_db()
-    assert test_user.check_password("newTestPassword123")
+    user.refresh_from_db()
+    assert user.check_password("newTestPassword123")
 
     login_endpoint = reverse("user:login")
     login_data = {"username": "testuser", "password": "newTestPassword123"}
@@ -67,9 +67,9 @@ def test_password_reset_confirm_success(client, test_user):
 
 
 @pytest.mark.django_db
-def test_password_reset_confirm_redirect(client, test_user):
-    uidb64 = urlsafe_base64_encode(force_bytes(test_user.pk))
-    token = default_token_generator.make_token(test_user)
+def test_password_reset_confirm_redirect(client, user):
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
 
     endpoint = reverse(
         "user:password_reset_confirm",
@@ -89,8 +89,8 @@ def test_password_reset_confirm_redirect(client, test_user):
 
 
 @pytest.mark.django_db
-def test_password_reset_confirm_invalid_token(client, test_user):
-    uidb64 = urlsafe_base64_encode(force_bytes(test_user.pk))
+def test_password_reset_confirm_invalid_token(client, user):
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
     invalid_token = "invalid-token"
     endpoint = reverse(
         "user:password_reset_confirm",
@@ -103,9 +103,9 @@ def test_password_reset_confirm_invalid_token(client, test_user):
 
 
 @pytest.mark.django_db
-def test_password_reset_confirm_mismatch_password(client, test_user):
-    uidb64 = urlsafe_base64_encode(force_bytes(test_user.pk))
-    token = default_token_generator.make_token(test_user)
+def test_password_reset_confirm_mismatch_password(client, user):
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
 
     endpoint = reverse(
         "user:password_reset_confirm",
@@ -125,14 +125,14 @@ def test_password_reset_confirm_mismatch_password(client, test_user):
     assert not form.is_valid()
     assert "new_password2" in form.errors
 
-    test_user.refresh_from_db()
-    assert not test_user.check_password("newTestPassword123")
+    user.refresh_from_db()
+    assert not user.check_password("newTestPassword123")
 
 
 @pytest.mark.django_db
-def test_password_reset_confirm_weak_password(client, test_user):
-    uidb64 = urlsafe_base64_encode(force_bytes(test_user.pk))
-    token = default_token_generator.make_token(test_user)
+def test_password_reset_confirm_weak_password(client, user):
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
 
     endpoint = reverse(
         "user:password_reset_confirm",
@@ -164,10 +164,10 @@ def test_password_reset_confirm_weak_password(client, test_user):
     ids=["new_password1", "new_password2", "new_password1 and new_password2"],
 )
 def test_password_reset_confirm_without_required_fields(
-    client, test_user, error_field, form_data
+    client, user, error_field, form_data
 ):
-    uidb64 = urlsafe_base64_encode(force_bytes(test_user.pk))
-    token = default_token_generator.make_token(test_user)
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
 
     endpoint = reverse(
         "user:password_reset_confirm",

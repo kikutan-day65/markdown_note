@@ -4,7 +4,7 @@ from user.forms import UserLoginForm
 
 
 @pytest.mark.django_db
-def test_user_login_form_with_username(test_user):
+def test_user_login_form_with_username(user):
     form_data = {
         "username": "testuser",
         "password": "testpassword123",
@@ -15,7 +15,7 @@ def test_user_login_form_with_username(test_user):
 
 
 @pytest.mark.django_db
-def test_user_login_form_with_email(test_user):
+def test_user_login_form_with_email(user):
     form_data = {
         "username": "testuser@example.com",
         "password": "testpassword123",
@@ -37,7 +37,7 @@ def test_user_login_form_with_email(test_user):
         "wrong_password",
     ],
 )
-def test_user_login_form_error_username(test_user, username, password):
+def test_user_login_form_error_username(user, username, password):
     form_data = {
         "username": username,
         "password": password,
@@ -59,7 +59,7 @@ def test_user_login_form_error_username(test_user, username, password):
         "wrong_password_for_email",
     ],
 )
-def test_user_login_form_error_email(test_user, email, password):
+def test_user_login_form_error_email(user, email, password):
     form_data = {
         "username": email,
         "password": password,
@@ -78,7 +78,7 @@ def test_user_login_form_error_email(test_user, email, password):
     ],
     ids=["username", "password"],
 )
-def test_user_login_form_without_required_fields(test_user, username, password):
+def test_user_login_form_without_required_fields(user, username, password):
     form_data = {
         "username": username,
         "password": password,

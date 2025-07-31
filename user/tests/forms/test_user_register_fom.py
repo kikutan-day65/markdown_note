@@ -89,7 +89,7 @@ def test_user_register_form_with_password_mismatch():
 
 
 @pytest.mark.django_db
-def test_user_register_form_with_username(test_user):
+def test_user_register_form_with_username(user):
     form_data = {
         "username": "testuser",
         "email": "newuser@example.com",
