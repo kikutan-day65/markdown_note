@@ -5,13 +5,13 @@ from user.views import UserDetailView
 
 
 @pytest.mark.django_db
-def test_user_detail_view(client, test_user):
-    endpoint = reverse("user:detail", kwargs={"pk": test_user.pk})
+def test_user_detail_view(client, user):
+    endpoint = reverse("user:detail", kwargs={"pk": user.pk})
     response = client.get(endpoint)
 
     assert response.status_code == 200
     assert "user/user_detail.html" in [t.name for t in response.templates]
-    assert response.context["user_detail"] == test_user
+    assert response.context["user_detail"] == user
 
 
 @pytest.mark.django_db

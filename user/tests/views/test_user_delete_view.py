@@ -9,25 +9,25 @@ CustomUser = get_user_model()
 
 
 @pytest.mark.django_db
-def test_user_delete_view(authenticated_client, test_user):
-    endpoint = reverse("user:delete_user", kwargs={"pk": test_user.pk})
+def test_user_delete_view(authenticated_client, user):
+    endpoint = reverse("user:delete_user", kwargs={"pk": user.pk})
     response = authenticated_client.get(endpoint)
 
     assert response.status_code == 200
 
 
 @pytest.mark.django_db
-def test_user_delete_view_success(authenticated_client, test_user):
-    endpoint = reverse("user:delete_user", kwargs={"pk": test_user.pk})
+def test_user_delete_view_success(authenticated_client, user):
+    endpoint = reverse("user:delete_user", kwargs={"pk": user.pk})
     response = authenticated_client.post(endpoint, follow=True)
 
     assert response.status_code == 200
-    assert not CustomUser.objects.filter(pk=test_user.pk).exists()
+    assert not CustomUser.objects.filter(pk=user.pk).exists()
 
 
 @pytest.mark.django_db
-def test_user_delete_view_success_message(authenticated_client, test_user):
-    endpoint = reverse("user:delete_user", kwargs={"pk": test_user.pk})
+def test_user_delete_view_success_message(authenticated_client, user):
+    endpoint = reverse("user:delete_user", kwargs={"pk": user.pk})
     response = authenticated_client.post(endpoint, follow=True)
     messages = list(get_messages(response.wsgi_request))
 
@@ -35,8 +35,8 @@ def test_user_delete_view_success_message(authenticated_client, test_user):
 
 
 @pytest.mark.django_db
-def test_user_delete_view_context(authenticated_client, test_user):
-    endpoint = reverse("user:delete_user", kwargs={"pk": test_user.pk})
+def test_user_delete_view_context(authenticated_client, user):
+    endpoint = reverse("user:delete_user", kwargs={"pk": user.pk})
     response = authenticated_client.get(endpoint)
 
     assert response.status_code == 200
@@ -44,8 +44,8 @@ def test_user_delete_view_context(authenticated_client, test_user):
 
 
 @pytest.mark.django_db
-def test_user_delete_view_get_unauthorized_user(client, test_user):
-    endpoint = reverse("user:delete_user", kwargs={"pk": test_user.pk})
+def test_user_delete_view_get_unauthorized_user(client, user):
+    endpoint = reverse("user:delete_user", kwargs={"pk": user.pk})
     login_url = reverse("user:login")
     response = client.get(endpoint)
 
@@ -54,8 +54,8 @@ def test_user_delete_view_get_unauthorized_user(client, test_user):
 
 
 @pytest.mark.django_db
-def test_user_delete_view_post_unauthenticated_user(client, test_user):
-    endpoint = reverse("user:delete_user", kwargs={"pk": test_user.pk})
+def test_user_delete_view_post_unauthenticated_user(client, user):
+    endpoint = reverse("user:delete_user", kwargs={"pk": user.pk})
     login_url = reverse("user:login")
 
     response = client.post(endpoint)
