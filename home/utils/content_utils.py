@@ -119,7 +119,16 @@ def delete_unused_images(content: str, article: Article) -> None:
     ).exclude(article_image__in=image_paths).delete()
 
 
-def is_valid_upload(user, image_file):
+def is_valid_upload(user, image_file) -> tuple[bool, str | None]:
+    """Validate whether the image file can be uploaded by the given user
+
+    Args:
+        user: request user
+        image_file: uploaded image by user
+
+    Returns:
+        tuple[bool, str | None]: bool and message
+    """
     if image_file.size > MAX_IMAGE_SIZE:
         return False, IMAGE_SIZE_ERROR
 
