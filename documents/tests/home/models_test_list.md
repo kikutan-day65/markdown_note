@@ -19,3 +19,4 @@
 -   [x] Creating an article image linked to an article
 -   [x] uploaded_at is automatically set on save
 -   [x] Accessing article’s images via article.images.all()
+-   [x] Deleting an `ArticleImage` also deletes the associated image file (via `post_delete` signal)
