@@ -9,20 +9,20 @@ from home.models import ArticleImage
 
 
 @pytest.mark.django_db
-def test_create_article_image(test_article, test_image):
+def test_create_article_image(article, image):
     article_image = ArticleImage.objects.create(
-        article_image=test_image, article=test_article
+        article_image=image, article=article, user=article.user
     )
 
     assert article_image.pk is not None
-    assert article_image.article == test_article
+    assert article_image.article == article
 
 
 @pytest.mark.django_db
-def test_uploaded_at_is_set_automatically(test_article, test_image):
+def test_uploaded_at_is_set_automatically(article, image):
     before = timezone.now()
     article_image = ArticleImage.objects.create(
-        article_image=test_image, article=test_article
+        article_image=image, article=article, user=article.user
     )
     after = timezone.now()
 
@@ -30,15 +30,32 @@ def test_uploaded_at_is_set_automatically(test_article, test_image):
 
 
 @pytest.mark.django_db
-def test_user_can_access_related_article_images(test_article):
+def test_user_can_access_related_article_images(article):
     img1 = SimpleUploadedFile("img1.jpg", b"img1-content", content_type="image/jpeg")
     img2 = SimpleUploadedFile("img2.jpg", b"img2-content", content_type="image/jpeg")
 
-    ArticleImage.objects.create(article=test_article, article_image=img1)
-    ArticleImage.objects.create(article=test_article, article_image=img2)
-    images = test_article.images.all()
-    filenames = [img.article_image.name for img in images]
+    image1 = ArticleImage.objects.create(
+        article=article, article_image=img1, user=article.user
+    )
+    image2 = ArticleImage.objects.create(
+        article=article, article_image=img2, user=article.user
+    )
+
+    images = article.images.all()
 
     assert images.count() == 2
-    assert any("img1" in name for name in filenames)
-    assert any("img2" in name for name in filenames)
+    assert set(images) == {image1, image2}
+
+
+@pytest.mark.django_db
+@patch("django.db.models.fields.files.FieldFile.delete")
+def test_post_delete_signal_deletes_image_file(mock_delete, article, image):
+    article_image = ArticleImage.objects.create(
+        article_image=image,
+        article=article,
+        user=article.user,
+    )
+
+    article_image.delete()
+
+    mock_delete.assert_called_once()
