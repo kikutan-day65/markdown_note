@@ -23,7 +23,7 @@ A simple CRUD application that allows users to post articles in Markdown format.
 
 ## Tech Stack
 
--   **Backend**: Django 5.1, django-filter, django-environ
+-   **Backend**: Django 5.1, django-filter, django-environ, boto3, django-storages
 -   **Frontend**: HTML, CSS, JavaScript
 -   **UI**: Bootstrap 5.3.6, django-widget-tweaks
 -   **Markdown**: Ace Editor, marked.js, highlight.js, Beautiful Soup, nh3
