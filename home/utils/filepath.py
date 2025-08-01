@@ -1,17 +1,13 @@
 import os
 from uuid import uuid4
 
+from django.utils import timezone
+
 
 def article_images_path(instance, filename):
-    article_id = instance.article.id
-    user_id = instance.article.user.id
+    user_id = instance.user.id
+    date = timezone.now().strftime("%Y%m%d")
+    extension = filename.split(".")[-1]
+    new_filename = f"{uuid4().hex}.{extension}"
 
-    return f"article_images/{user_id}/{article_id}/{filename}"
-
-
-def temp_article_images_path(user, filename):
-    ext = os.path.splitext(filename)[1]
-    new_filename = f"{uuid4().hex}{ext}"
-    user_id = user.id
-
-    return f"article_images/{user_id}/tmp/{new_filename}"
+    return f"article_images/{user_id}/{date}/{new_filename}"

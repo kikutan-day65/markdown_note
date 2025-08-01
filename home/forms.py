@@ -6,7 +6,7 @@ from .models import Article
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields = ["title", "content"]
+        fields = ["title", "markdown_content"]
         widgets = {
             "title": forms.TextInput(
                 attrs={
@@ -14,7 +14,7 @@ class ArticleForm(forms.ModelForm):
                     "placeholder": "Add title here...",
                 }
             ),
-            "content": forms.Textarea(
+            "markdown_content": forms.Textarea(
                 attrs={
                     "id": "md-content",
                     "placeholder": "Add markdown here...",

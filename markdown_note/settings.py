@@ -156,12 +156,6 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -173,10 +167,41 @@ AUTH_USER_MODEL = "user.CustomUser"
 # Authentication backend setting
 AUTHENTICATION_BACKENDS = ["user.backends.UsernameOrEmailBackend"]
 
-# Media files setting
-MEDIA_URL = "media/"
+# Media and storage settings
+if DEBUG:
+    MEDIA_URL = "media/"
+    MEDIA_ROOT = BASE_DIR / "media"
 
-MEDIA_ROOT = BASE_DIR / "media"
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    INSTALLED_APPS += ["storages"]
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
+    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
+
+    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default=None)
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
 
 # SMTP settings
 if DEBUG:
@@ -190,6 +215,26 @@ else:
     EMAIL_USE_TLS = env("EMAIL_USE_TLS")
     DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
+# HTML sanitization settings
+# fmt: off
+NH3_HTML_SANITIZERS = {
+    "tags": {
+        "p", "strong", "em", "ul", "ol", "li", "a", "img", "code", "pre",
+        "blockquote", "h1", "h2", "h3", "h4", "h5", "br", "hr",
+        "table", "thead", "tbody", "tr", "th", "td",
+        "div", "span"
+    },
+    "attributes": {
+        "a": {"href", "title"},
+        "img": {"src", "alt", "title"},
+        "div": {"class"},
+        "code": {"class"},
+        "pre": {"class"},
+        "span": {"class"},
+    },
+    "url_schemes": {"http", "https", ""},
+}
+# fmt: on
 
 # Django debug toolbar settings
 if DEBUG:
