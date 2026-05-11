@@ -2,7 +2,7 @@
 
 ## Overview
 
-A simple CRUD application that allows users to post articles in Markdown format. Built mainly to explore Django’s function-based views (FBV), with a focus on backend design and logic. The frontend is kept minimal to highlight backend implementation.
+A simple CRUD application that allows users to post articles in Markdown format. Built mainly to explore Django’s class-based views (CBV), with a focus on backend design and logic. The frontend is kept minimal to highlight backend implementation.
 
 ## Features
 
